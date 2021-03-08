@@ -1,4 +1,11 @@
-# 프로젝트 README (수정 요)
+# Web Search
 
-![](https://user-images.githubusercontent.com/69110262/109945955-1aabfc80-7d1b-11eb-839a-8a9ea7c48ce3.png)
-![](https://user-images.githubusercontent.com/69110262/109946083-31eaea00-7d1b-11eb-9ab9-62ab6bc885ad.png)
+![image](https://user-images.githubusercontent.com/42461455/110324105-e311bd00-8058-11eb-97d8-b1c28e2cf846.png)
+
+기능 구현 해두었습니다. 현재위치 기반으로 가까운 약국 및 편의점 검색 가능합니다
+
+### installation
+
+1. git clone
+2. python manage.py runserver
+3. localhost:8000/map
