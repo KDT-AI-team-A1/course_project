@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from detectron2.structures import BoxMode
+from detectron2.data import MetadataCatalog, DatasetCatalog
 from tqdm import tqdm
 import os
 import cv2
@@ -40,19 +41,28 @@ class Load_Train_Data:
             return_objs.append(target)
         return return_objs
 
-    def get_mask_dicts(self, df):
+    def get_mask_dicts(self):
         dataset_dicts = []
-        image_name_list = df['name'].unique()
+        image_name_list = self.df['name'].unique()
         for idx, image_name in enumerate(tqdm(image_name_list)):
             filename = os.path.join(DIR_IMAGE, image_name)
             objs = self.generate_target(image_name)
-            target_image = df[df['name'] == image_name]
+            target_image = self.df[self.df['name'] == image_name]
 
             record = {"file_name": filename,
-                      "height": target_image['width'].iloc[0],
-                      "width": target_image['height'].iloc[0],
+                      "height": target_image['height'].iloc[0],
+                      "width": target_image['width'].iloc[0],
                       'image_id': idx,
                       'annotations': objs}
 
             dataset_dicts.append(record)
         return dataset_dicts
+
+    def register_dataset_catalog(self, phase, classes):
+        for p in phase:
+            DatasetCatalog.register(p, lambda p=p: self.get_mask_dicts())
+            MetadataCatalog.get(p).set(thing_classes=classes)
+
+    def clear_dataset_catalog(self):
+        DatasetCatalog.clear()
+        MetadataCatalog.clear()
