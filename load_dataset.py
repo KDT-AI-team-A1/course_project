@@ -10,6 +10,17 @@ annotation_file = 'train_all.csv'
 DIR_IMAGE = '/images'
 
 
+def register_dataset_catalog(loader, phase, classes):
+    for p in phase:
+        DatasetCatalog.register(p, lambda p=p: loader.get_mask_dicts())
+        MetadataCatalog.get(p).set(thing_classes=classes)
+
+
+def clear_dataset_catalog():
+    DatasetCatalog.clear()
+    MetadataCatalog.clear()
+
+
 class Load_Train_Data:
     def __init__(self, annotation_file, IMAGE_DIR):
         self.df = pd.read_csv(annotation_file)
@@ -45,7 +56,7 @@ class Load_Train_Data:
         dataset_dicts = []
         image_name_list = self.df['name'].unique()
         for idx, image_name in enumerate(tqdm(image_name_list)):
-            filename = os.path.join(DIR_IMAGE, image_name)
+            filename = os.path.join(self.DIR, image_name)
             objs = self.generate_target(image_name)
             target_image = self.df[self.df['name'] == image_name]
 
@@ -58,11 +69,3 @@ class Load_Train_Data:
             dataset_dicts.append(record)
         return dataset_dicts
 
-    def register_dataset_catalog(self, phase, classes):
-        for p in phase:
-            DatasetCatalog.register(p, lambda p=p: self.get_mask_dicts())
-            MetadataCatalog.get(p).set(thing_classes=classes)
-
-    def clear_dataset_catalog(self):
-        DatasetCatalog.clear()
-        MetadataCatalog.clear()
