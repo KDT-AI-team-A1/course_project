@@ -135,12 +135,12 @@ def modify_cfg(args, cfg_filepath = "COCO-Detection/faster_rcnn_R_50_FPN_1x.yaml
     cfg.DATASETS.TRAIN = ('mask_train',)
     cfg.DATASETS.TEST = ('mask_val',)
     cfg.DATALOADER.NUM_WORKERS = 2
-    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(cfg_filepath)  # Let training initialize from model zoo
+    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(cfg_filepath)  
     cfg.SOLVER.IMS_PER_BATCH = 2
-    cfg.SOLVER.BASE_LR = 0.00025  # pick a good LR
-    cfg.SOLVER.MAX_ITER = args.max_iter    # 300 iterations seems good enough for this toy dataset; you will need to train longer for a practical dataset
-    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 1024   # faster, and good enough for this toy dataset (default: 512)
-    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2  # (see https://detectron2.readthedocs.io/tutorials/datasets.html#update-the-config-for-new-datasets)
+    cfg.SOLVER.BASE_LR = 0.00025  
+    cfg.SOLVER.MAX_ITER = args.max_iter   
+    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 1024   
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2  
     cfg.OUTPUT_DIR = args.output
 
     cfg.TEST.EVAL_PERIOD = 200
