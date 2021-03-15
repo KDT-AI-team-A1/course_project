@@ -8,9 +8,14 @@ import cv2
 import matplotlib.pyplot as plt
 import time
 times = []
-# inference
-def using_model(metadata, threshold):
 
+def using_model(metadata, threshold):
+  """
+  inference model and check average inference time
+  :param metadata: Registered train dataset
+  :param threshold: Criteria between 0 and 1 to judge the category
+  :return:
+  """
   cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, 'model_final.pth')
   cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = threshold   
   cfg.DATASETS.TEST = (metadata.name, )

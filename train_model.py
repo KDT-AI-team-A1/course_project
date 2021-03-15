@@ -33,6 +33,10 @@ print(train_df.head())
 
 
 def parse_args():
+    """
+    Specifying parameters to configure cfg
+    :return: arguments for modifying cfg
+    """
     args = easydict.EasyDict({
         "gpu": 0,
         "resume": False,
@@ -48,11 +52,21 @@ def parse_args():
 
 class LossEvalHook(HookBase):
     def __init__(self, eval_period, model, data_loader):
+        """
+        Initialize class
+        :param eval_period: the period to run eval_function
+        :param model: model to use
+        :param data_loader: produce data to be run by model(data)
+        """
         self._model = model
         self._period = eval_period
         self._data_loader = data_loader
     
     def _do_loss_eval(self):
+        """
+        evaluate the loss
+        :return: list of the loss
+        """
         # Copying inference_on_dataset from evaluator.py
         total = len(self._data_loader)
         num_warmup = min(5, total - 1)
@@ -89,7 +103,11 @@ class LossEvalHook(HookBase):
         return losses
             
     def _get_loss(self, data):
-        # How loss is calculated on train_loop 
+        """
+        How loss is calculated on train_loop
+        :param data: data_loader's inputs
+        :return:
+        """
         metrics_dict = self._model(data)
         # print(metrics_dict)
         metrics_dict = {
@@ -102,6 +120,10 @@ class LossEvalHook(HookBase):
         
         
     def after_step(self):
+        """
+        Called after each iteration.
+        :return:
+        """
         next_iter = self.trainer.iter + 1
         is_final = next_iter == self.trainer.max_iter
         if is_final or (self._period > 0 and next_iter % self._period == 0):
@@ -113,6 +135,10 @@ class LossEvalHook(HookBase):
 
 class MyTrainer(DefaultTrainer):
     def build_hooks(self):
+        """
+        Build a list of default hooks, including timing, evaluation, checkpointing, lr scheduling, precise BN, writing events.
+        :return: list of HookBase
+        """
         hooks = super().build_hooks()
         hooks.insert(-1,LossEvalHook(
             cfg.TEST.EVAL_PERIOD,
@@ -128,8 +154,13 @@ class MyTrainer(DefaultTrainer):
 
 
 
-#modify the config file
 def modify_cfg(args, cfg_filepath = "COCO-Detection/faster_rcnn_R_50_FPN_1x.yaml"):
+    """
+    modify the config file
+    :param args: Dictionary containing parameters that can be modified in cfg
+    :param cfg_filepath: model file path
+    :return: cfg for model training
+    """
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file(cfg_filepath))
     cfg.DATASETS.TRAIN = ('mask_train',)
@@ -150,8 +181,18 @@ def modify_cfg(args, cfg_filepath = "COCO-Detection/faster_rcnn_R_50_FPN_1x.yaml
 
 
 def plot_loss(cfg):
+    """
+    Draw a plot
+    :param cfg: configuration for model training
+    :return: graph plot
+    """
     experiment_folder = cfg.OUTPUT_DIR
     def load_json_arr(json_path):
+        """
+        Read the metrics.json file
+        :param json_path: path of the metrics.json
+        :return:
+        """
         lines = []
         # with open(json_path, 'r') as f:
         #     for line in f:
@@ -175,9 +216,13 @@ def plot_loss(cfg):
 
 
 
-from detectron2.engine import DefaultTrainer
-#train model
 def train_model(args, cfg):
+    """
+    train model
+    :param args: arguments for modifying configuration
+    :param cfg: configuration for model training
+    :return: results of train
+    """
     trainer = MyTrainer(cfg) 
     trainer.resume_or_load(resume=args.resume)
     trainer.train()
