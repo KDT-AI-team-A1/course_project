@@ -2,7 +2,6 @@
 ## Load Model Weights from trained weights
 ## Predictor Setup
 ## Predict and Visualize the result
-from detectron2.utils.visualizer import ColorMode
 import glob
 import cv2
 import matplotlib.pyplot as plt

@@ -2,15 +2,12 @@ import detectron2
 from detectron2.utils.logger import setup_logger
 setup_logger()
 import numpy as np
-import os, json, cv2, random
+import os, json
 from detectron2 import model_zoo
-from detectron2.engine import DefaultPredictor
 from detectron2.engine import DefaultTrainer
 from detectron2.config import get_cfg
-from detectron2.utils.visualizer import Visualizer
 from detectron2.data import MetadataCatalog, DatasetCatalog
 from detectron2.engine.hooks import HookBase
-from detectron2.evaluation import inference_context
 from detectron2.utils.logger import log_every_n_seconds
 from detectron2.data import DatasetMapper, build_detection_test_loader
 import detectron2.utils.comm as comm
@@ -194,13 +191,6 @@ def plot_loss(cfg):
         :return:
         """
         lines = []
-        # with open(json_path, 'r') as f:
-        #     for line in f:
-        #         lines.append(json.loads(line))
-
-        # for line in open(json_path, 'r'):
-        #   lines.append(json.loads(line))
-
         lines = [json.loads(line) for line in open(json_path, 'r')]
         return lines
     experiment_metrics = load_json_arr(experiment_folder + 'metrics.json')
@@ -224,7 +214,7 @@ def train_model(args, cfg):
     :return: results of train
     """
     trainer = MyTrainer(cfg) 
-    trainer.resume_or_load(resume=args.resume)
+    trainer.resume_or_load(resume=args.resume) # "/content/output/"
     trainer.train()
 
 
@@ -243,12 +233,7 @@ if __name__=='__main__':
 
     os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
     train_model(args, cfg)
-
-    if args.plot_only:
-        plot_loss(cfg)
-    else:
-        os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
-        train_model(args, cfg)
+    plot_loss(cfg)
 
 
 
