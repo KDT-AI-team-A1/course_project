@@ -152,15 +152,6 @@ def build_detection_val_loader(cfg, dataset_name: str, mapper=None):
     return data_loader
 
 
-class MyTrainer(DefaultTrainer):
-    @classmethod
-    def build_evaluator(cls, cfg, dataset_name, output_folder=None):
-        if output_folder is None:
-            os.makedirs("coco_eval", exist_ok=True)
-            output_folder = "coco_eval"
-        return COCOEvaluator(dataset_name, cfg, False, output_folder)
-
-
 def parse_args():
     args = easydict.EasyDict({
         "gpu": 0,
@@ -179,6 +170,7 @@ def parse_args():
     return args
 
 
+
 def get_evaluator(cfg, dataset_name, output_folder=None):
     """
     Create evaluator(s) for a given dataset.
@@ -193,6 +185,7 @@ def get_evaluator(cfg, dataset_name, output_folder=None):
     if len(evaluator_list) == 1:
         return evaluator_list[0]
     return DatasetEvaluators(evaluator_list)
+
 
 
 def do_test(cfg, model):
@@ -322,12 +315,9 @@ def do_train(cfg, model, resume=True, val_set='mask_val'):
             if iteration - start_iter > 5 and ((iteration - start_iter) % print_every == 0 or iteration == max_iter):
                 for writer in writers:
                     writer.write()
-
                 # Write my log
                 log_file.write(f"[iter {iteration}, best_loss: {best_loss}] total_loss: {losses}, lr: {lr}\n")
-
             periodic_checkpointer.step(iteration)
-
     log_file.close()
 
 
@@ -353,7 +343,6 @@ def setup(args):
     return cfg
 
 
-
 def main():
     args = parse_args()
     ltd = Load_Train_Data(DIR_INPUT + 'train_2.csv', DIR_TRAIN)
@@ -363,7 +352,6 @@ def main():
     register_dataset_catalog(vtd, phase=['mask_val'], classes=['with', 'No'])
 
     cfg = setup(args)
-
     model = build_model(cfg)
 
     if args.eval_only:
@@ -380,7 +368,6 @@ def main():
 
     do_train(cfg, model, val_set='mask_val')
     return do_test(cfg, model)
-
 
 
 if __name__ == "__main__":
