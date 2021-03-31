@@ -14,7 +14,6 @@ from collections import OrderedDict
 import torch
 from torch.nn.parallel import DistributedDataParallel
 import detectron2.utils.comm as comm
-from detectron2.engine import DefaultTrainer, default_argument_parser, default_setup, hooks, launch, DefaultPredictor
 from detectron2.utils.events import (
     CommonMetricPrinter,
     EventStorage,
@@ -51,25 +50,15 @@ from detectron2 import model_zoo
 logger = logging.getLogger(__name__)
 _C.MY_CUSTOM = CN()
 
-def trivial_batch_collator(batch):
-    """
-    A batch collator that does nothing.
-    """
-    return batch
-
 
 def get_detection_dataset_dicts(dataset_names, filter_empty=True, min_keypoints=0, proposal_files=None):
     """
     Load and prepare dataset dicts for instance detection/segmentation and semantic segmentation.
-    Args:
-        dataset_names (list[str]): a list of dataset names
-        filter_empty (bool): whether to filter out images without instance annotations
-        min_keypoints (int): filter out images with fewer keypoints than
-            `min_keypoints`. Set to 0 to do nothing.
-        proposal_files (list[str]): if given, a list of object proposal files
-            that match each dataset in `dataset_names`.
-    Returns:
-        list[dict]: a list of dicts following the standard dataset dict format.
+    @param dataset_names: a list of dataset names
+    @param filter_empty: whether to filter out images without instance annotations
+    @param min_keypoints: filter out images with fewer keypoints than `min_keypoints`. Set to 0 to do nothing.
+    @param proposal_files: if given, a list of objeget_facemask_1_dictsct proposal files that match each dataset in `dataset_names`.
+    @return: a list of dicts following the standard dataset dict format.
     """
     assert len(dataset_names)
     dataset_dicts = [DatasetCatalog.get(dataset_name) for dataset_name in dataset_names]
@@ -102,6 +91,10 @@ def get_detection_dataset_dicts(dataset_names, filter_empty=True, min_keypoints=
 
 class AdetCheckpointer(DetectionCheckpointer):
     def _load_file(self, filename):
+        """
+        @param filename:
+        @return:
+        """
         if filename.endswith(".pkl"):
             with PathManager.open(filename, "rb") as f:
                 data = pickle.load(f, encoding="latin1")
@@ -126,6 +119,12 @@ class AdetCheckpointer(DetectionCheckpointer):
 
 
 def build_detection_val_loader(cfg, dataset_name: str, mapper=None):
+    """
+    @param cfg: configuration for model training
+    @param dataset_name: validation dataset name
+    @param mapper: DatasetMapper
+    @return:
+    """
     dataset_dicts = get_detection_dataset_dicts(
         [dataset_name],
         filter_empty=False,
@@ -147,12 +146,15 @@ def build_detection_val_loader(cfg, dataset_name: str, mapper=None):
         dataset,
         num_workers=cfg.DATALOADER.NUM_WORKERS,
         batch_sampler=batch_sampler,
-        collate_fn=trivial_batch_collator,
     )
     return data_loader
 
 
 def parse_args():
+    """
+    Specifying parameters to configure cfg
+    @return: arguments for modifying cfg
+    """
     args = easydict.EasyDict({
         "gpu": 0,
         "resume": True,
@@ -164,7 +166,8 @@ def parse_args():
         "ims_per_batch": 2,
         "batch_size_per_image": 512,
         "num_classes": 2,
-        "eval_period": 100
+        "eval_period": 100,
+        "mask_on": False
     })
     os.environ['CUDA_VISIBLE_DEVICES'] = '0'
     return args
@@ -177,6 +180,10 @@ def get_evaluator(cfg, dataset_name, output_folder=None):
     This uses the special metadata "evaluator_type" associated with each builtin dataset.
     For your own dataset, you can simply create an evaluator manually in your
     script and do not have to worry about the hacky if-else logic here.
+    @param cfg: configuration for model training
+    @param dataset_name:
+    @param output_folder:
+    @return:
     """
     if output_folder is None:
         output_folder = os.path.join(cfg.OUTPUT_DIR, "inference")
@@ -189,6 +196,11 @@ def get_evaluator(cfg, dataset_name, output_folder=None):
 
 
 def do_test(cfg, model):
+    """
+    @param cfg: configuration for model training
+    @param model: model that builds the model structure with `build_model`
+    @return:
+    """
     results = OrderedDict()
     for dataset_name in cfg.DATASETS.TEST:
         data_loader = build_detection_test_loader(cfg, dataset_name)
@@ -206,6 +218,12 @@ def do_test(cfg, model):
 
 
 def do_val(cfg, model, val_dataloader):
+    """
+    @param cfg: configuration for model training
+    @param model: model that builds the model structure with `build_model`
+    @param val_dataloader:
+    @return:
+    """
     with torch.no_grad():
         losses = []
         tmp = None
@@ -222,6 +240,13 @@ def do_val(cfg, model, val_dataloader):
 
 
 def do_train(cfg, model, resume=True, val_set='mask_val'):
+    """
+    train model
+    @param cfg: configuration for model training
+    @param model: model that builds the model structure with `build_model`
+    @param resume: resume train or not
+    @param val_set: dataset for validation
+    """
     model.train()
     optimizer = build_optimizer(cfg, model)
     scheduler = build_lr_scheduler(cfg, optimizer)
@@ -324,11 +349,13 @@ def do_train(cfg, model, resume=True, val_set='mask_val'):
 def setup(args):
     """
     Create configs and perform basic setups.
+    @param args: arguments for modifying configuration
+    @return: cfg for model training
     """
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml"))
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml")
-    cfg.MODEL.MASK_ON = False
+    cfg.MODEL.MASK_ON = args.mask_on
     cfg.DATASETS.TRAIN = ('mask_train',)
     cfg.DATASETS.TEST = ('mask_val',)
     cfg.SOLVER.BASE_LR = args.learning_rate
@@ -343,22 +370,23 @@ def setup(args):
     return cfg
 
 
-def main():
+if __name__ == "__main__":
     args = parse_args()
-    ltd = Load_Train_Data(DIR_INPUT + 'train_2.csv', DIR_TRAIN)
+    ltd = Load_Train_Data(DIR_INPUT+'train_2.csv', DIR_TRAIN)
     clear_dataset_catalog()
     register_dataset_catalog(ltd, phase=['mask_train'], classes=['with', 'No'])
-    vtd = Load_Train_Data(DIR_INPUT + 'val_2.csv', DIR_TRAIN)
+    vtd = Load_Train_Data(DIR_INPUT+'val_2.csv', DIR_TRAIN)
     register_dataset_catalog(vtd, phase=['mask_val'], classes=['with', 'No'])
 
+    mask_metadata = MetadataCatalog.get("mask_train").set(thing_classes=['with', 'No'], evaluator_type="coco")
     cfg = setup(args)
-    model = build_model(cfg)
 
+    model = build_model(cfg)
     if args.eval_only:
         DetectionCheckpointer(model, save_dir=cfg.OUTPUT_DIR).resume_or_load(
             cfg.MODEL.WEIGHTS, resume=args.resume
         )
-        return do_test(cfg, model)
+        # return do_test(cfg, model)
 
     distributed = comm.get_world_size() > 1
     if distributed:
@@ -367,8 +395,4 @@ def main():
         )
 
     do_train(cfg, model, val_set='mask_val')
-    return do_test(cfg, model)
-
-
-if __name__ == "__main__":
-    main()
+    do_test(cfg, model)
