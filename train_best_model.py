@@ -92,6 +92,7 @@ def get_detection_dataset_dicts(dataset_names, filter_empty=True, min_keypoints=
 class AdetCheckpointer(DetectionCheckpointer):
     def _load_file(self, filename):
         """
+        load native pth checkpoint
         @param filename:
         @return:
         """
@@ -181,8 +182,8 @@ def get_evaluator(cfg, dataset_name, output_folder=None):
     For your own dataset, you can simply create an evaluator manually in your
     script and do not have to worry about the hacky if-else logic here.
     @param cfg: configuration for model training
-    @param dataset_name:
-    @param output_folder:
+    @param dataset_name: Get the data set specified in cfg.DATASETS.TEST
+    @param output_folder: Inference directory where the resulting json file of evaluator will be saved
     @return:
     """
     if output_folder is None:
@@ -197,9 +198,10 @@ def get_evaluator(cfg, dataset_name, output_folder=None):
 
 def do_test(cfg, model):
     """
+    test model
     @param cfg: configuration for model training
     @param model: model that builds the model structure with `build_model`
-    @return:
+    @return: test results
     """
     results = OrderedDict()
     for dataset_name in cfg.DATASETS.TEST:
@@ -221,7 +223,7 @@ def do_val(cfg, model, val_dataloader):
     """
     @param cfg: configuration for model training
     @param model: model that builds the model structure with `build_model`
-    @param val_dataloader:
+    @param val_dataloader: Validation dataloader generated through build_detection_val_loader in the learning phase
     @return:
     """
     with torch.no_grad():
@@ -355,6 +357,7 @@ def setup(args):
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml"))
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml")
+    # cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, 'model_final.pth')
     cfg.MODEL.MASK_ON = args.mask_on
     cfg.DATASETS.TRAIN = ('mask_train',)
     cfg.DATASETS.TEST = ('mask_val',)
@@ -366,7 +369,7 @@ def setup(args):
     cfg.MY_CUSTOM.LOG_FILE = os.path.join(cfg.OUTPUT_DIR, 'my_log.txt')
     cfg.OUTPUT_DIR = args.output
     cfg.TEST.EVAL_PERIOD = args.eval_period
-    cfg.freeze()
+    # cfg.freeze()
     return cfg
 
 
@@ -377,7 +380,6 @@ if __name__ == "__main__":
     register_dataset_catalog(ltd, phase=['mask_train'], classes=['with', 'No'])
     vtd = Load_Train_Data(DIR_INPUT+'val_2.csv', DIR_TRAIN)
     register_dataset_catalog(vtd, phase=['mask_val'], classes=['with', 'No'])
-
     mask_metadata = MetadataCatalog.get("mask_train").set(thing_classes=['with', 'No'], evaluator_type="coco")
     cfg = setup(args)
 
@@ -386,7 +388,7 @@ if __name__ == "__main__":
         DetectionCheckpointer(model, save_dir=cfg.OUTPUT_DIR).resume_or_load(
             cfg.MODEL.WEIGHTS, resume=args.resume
         )
-        # return do_test(cfg, model)
+        do_test(cfg, model)
 
     distributed = comm.get_world_size() > 1
     if distributed:
