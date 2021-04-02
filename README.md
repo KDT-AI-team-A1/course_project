@@ -8,3 +8,6 @@ Programmers KDT 인공지능 데브코스 1기 A1 [Team Notion](https://www.noti
 
 ## Project History
 마스크 착용 알리미 [Project History](https://www.notion.so/leeyongjoo/765dc1522f124b80bc1ab3ac496decf4?v=89c4664ceab5477c9026622d4627865a)
+
+## Project Summary
+프로젝트 Summary [Git wiki page](https://github.com/KDT-AI-team-A1/course_project/wiki)
