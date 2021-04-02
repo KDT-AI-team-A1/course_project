@@ -1,4 +1,10 @@
-# 프로젝트 README (수정 요)
+# Programmers KDT AI A1 Team Project
 
-![](https://user-images.githubusercontent.com/69110262/109945955-1aabfc80-7d1b-11eb-839a-8a9ea7c48ce3.png)
-![](https://user-images.githubusercontent.com/69110262/109946083-31eaea00-7d1b-11eb-9ab9-62ab6bc885ad.png)
+![image](https://user-images.githubusercontent.com/69110262/113371688-eff8a680-93a1-11eb-8294-a60d2d5e78cc.png)
+![image](https://user-images.githubusercontent.com/69110262/113371696-f38c2d80-93a1-11eb-8214-9da97f3a8740.png)
+
+## A1 Team Notion
+Programmers KDT 인공지능 데브코스 1기 A1 [Team Notion](https://www.notion.so/leeyongjoo/1-fbb773cef5574078bc2e2f638682625e)
+
+## Project History
+마스크 착용 알리미 [Project History](https://www.notion.so/leeyongjoo/765dc1522f124b80bc1ab3ac496decf4?v=89c4664ceab5477c9026622d4627865a)
