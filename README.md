@@ -1,7 +1,9 @@
 # Programmers KDT AI A1 Team Project
 
-![image](https://user-images.githubusercontent.com/69110262/113371688-eff8a680-93a1-11eb-8294-a60d2d5e78cc.png)
-![image](https://user-images.githubusercontent.com/69110262/113371696-f38c2d80-93a1-11eb-8214-9da97f3a8740.png)
+![image](https://user-images.githubusercontent.com/42461455/113474471-148c7580-94ab-11eb-9719-e8931a0e8f73.png)
+
+![](https://user-images.githubusercontent.com/42461455/113474612-de9bc100-94ab-11eb-9cdd-b0adb8c9ac1a.gif)
+
 
 ## A1 Team Notion
 Programmers KDT 인공지능 데브코스 1기 A1 [Team Notion](https://www.notion.so/leeyongjoo/1-fbb773cef5574078bc2e2f638682625e)
