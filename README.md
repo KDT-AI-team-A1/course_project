@@ -4,6 +4,12 @@
 
 ![](https://user-images.githubusercontent.com/42461455/113474612-de9bc100-94ab-11eb-9cdd-b0adb8c9ac1a.gif)
 
+## Members
+- [김동우](https://github.com/dongwoo338)
+- [여채린](https://github.com/ChaeLinYeo)
+- [유재인](https://github.com/acoustic0422)
+- [이용주](https://github.com/leeyongjoo)
+- [설동찬](https://github.com/donchanee)
 
 ## A1 Team Notion
 Programmers KDT 인공지능 데브코스 1기 A1 [Team Notion](https://www.notion.so/leeyongjoo/1-fbb773cef5574078bc2e2f638682625e)
